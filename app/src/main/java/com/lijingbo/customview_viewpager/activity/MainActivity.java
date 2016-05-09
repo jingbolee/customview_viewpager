@@ -8,6 +8,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.AlphaAnimation;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout ll_guide_group;
     private List< ImageView > imagesLists;
     private ImageView view_red_point;
+    private Button btn_startapp;
     private int[] guideImages;
     private int pointDis; //两个点之间的距离
 
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         vp = (ViewPager) findViewById(R.id.vp_guide);
         ll_guide_group = (LinearLayout) findViewById(R.id.ll_guide_group);
         view_red_point = (ImageView) findViewById(R.id.view_red_point);
+        btn_startapp = (Button) findViewById(R.id.btn_startapp);
     }
 
     private void initData() {
@@ -124,7 +128,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            System.out.println("viewpager改变监听：" + position + ", " + positionOffset + ", " + positionOffsetPixels);
+            if ( position == imagesLists.size() - 1 ) {
+                btn_startapp.setVisibility(View.VISIBLE);
+                AlphaAnimation alpha=new AlphaAnimation(0.1f,1.0f);
+                alpha.setDuration(800);
+                btn_startapp.startAnimation(alpha);
+            } else {
+                btn_startapp.setVisibility(View.INVISIBLE);
+            }
+//            System.out.println("viewpager改变监听：" + position + ", " + positionOffset + ", " + positionOffsetPixels);
             int offset = (int) (pointDis * positionOffset + position * pointDis);
 ////            ViewGroup.LayoutParams params = view_red_point.getLayoutParams();
 //            int l = view_red_point.getLeft();
@@ -136,8 +148,9 @@ public class MainActivity extends AppCompatActivity {
 //            view_red_point.scrollTo(l + offset, t);
 
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) view_red_point.getLayoutParams();
-            params.leftMargin =offset;
+            params.leftMargin = offset;
             view_red_point.setLayoutParams(params);
+
 
         }
 
@@ -151,5 +164,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
+
 
 }
