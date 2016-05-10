@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Customview viewpager by jingbolee</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Customview viewpager</h1>
+      <h2 class="project-tagline">自定义控件，通过ViewPager实现app的引导页。</h2>
+      <a href="https://github.com/jingbolee/customview_viewpager" class="btn">View on GitHub</a>
+      <a href="https://github.com/jingbolee/customview_viewpager/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/jingbolee/customview_viewpager/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="customview_viewpager" class="anchor" href="#customview_viewpager" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>customview_viewpager</h1>
+
+<p>自定义控件，通过ViewPager实现大图轮播或者是app的引导页。</p>
+
+<h2>
+<a id="viewpager引导页知识点" class="anchor" href="#viewpager%E5%BC%95%E5%AF%BC%E9%A1%B5%E7%9F%A5%E8%AF%86%E7%82%B9" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ViewPager引导页知识点</h2>
+
+<ul>
+<li>ViewPager设置<strong>addOnPageChangeListener()</strong>，其中onPageScrolled()方法可以获取到ViewPager处于哪一页，滑动偏移量等信息</li>
+<li>Button在最后一个页面显示，可以通过onPageSelected()方法中的位置来判断是否到了最后一页，来显示button</li>
+<li>ViewPager设置<strong>setAdapter()</strong>，可以把需要显示的引导页显示出来</li>
+<li>setAdapter()需要实现一个adapter<strong>继承PagerAdapter</strong>,实现4个主要的方法：
+
+<ul>
+<li>public int <strong>getCount()</strong>:返回引导页的数量</li>
+<li>public boolean <strong>isViewFromObject(View view, Object object)</strong>：判断显示的是否是同一张图片，返回view == object</li>
+<li>public Object <strong>instantiateItem(ViewGroup container, int position)</strong>：显示的图片可以进行缓存的时候，会调用这个方法进行显示图片的初始化，将要显示的ImageView加入到ViewGroup中，然后作为返回值返回</li>
+<li>public void <strong>destroyItem(ViewGroup container, int position, Object object)</strong>：PagerAdapter只缓存三张要显示的图片，如果滑动的图片超出了缓存的范围，就会调用这个方法，将图片销毁.如：container.removeView(view(object)) </li>
+</ul>
+</li>
+<li>
+<p>获取到两个point的距离，在onCreate()中的时候，界面还没有layout完成，可以通过getViewTreeObserver()来观察，当完成了onLayout以后，才能获取到距离</p>
+
+<pre><code>ll_guide_group.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+    @Override
+    public void onGlobalLayout() {
+        ll_guide_group.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+        pointDis = ll_guide_group.getChildAt(1).getLeft() - ll_guide_group.getChildAt(0).getLeft();
+        Log.e(TAG, "连个point的距离为：" + pointDis);
+    }
+});  
+</code></pre>
+</li>
+<li>
+<p>设置全屏，并且去掉系统属性栏</p>
+
+<pre><code>&lt;style name="NoTitle" parent="Theme.AppCompat.Light.NoActionBar"&gt;
+    &lt;item name="android:windowNoTitle"&gt;true&lt;/item&gt;
+    &lt;item name="android:windowActionBar"&gt;false&lt;/item&gt;
+    &lt;item name="android:windowFullscreen"&gt;true&lt;/item&gt;
+    &lt;item name="android:windowContentOverlay"&gt;@null&lt;/item&gt;
+&lt;/style&gt;
+</code></pre>
+</li>
+<li>
+<p>小圆点可以通过shape属性来设置。</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
+     android:shape="oval"&gt;
+   &lt;solid android:color="@android:color/darker_gray"/&gt;
+&lt;/shape&gt;
+</code></pre>
+</li>
+<li><p>给Button设置按压样式，通过selector</p></li>
+<li>给Button的文字颜色设置按压样式，通过selector，通过设置android:color的属性</li>
+</ul>
+
+<h2>
+<a id="适配问题" class="anchor" href="#%E9%80%82%E9%85%8D%E9%97%AE%E9%A2%98" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>适配问题</h2>
+
+<ul>
+<li>
+<p>在XML中设置大小用的单位是dp，但是在代码中设置大小用的是pix，假如在代码中设置大小的话，需要把dp转换为具体手机的pix，否则会出现适配问题。</p>
+
+<pre><code>public class DensityUtil {  
+
+/** 
+ * 根据手机的分辨率从 dip 的单位 转成为 px(像素) 
+ */  
+public static int dip2px(Context context, float dpValue) {  
+    final float scale = context.getResources().getDisplayMetrics().density;  
+    return (int) (dpValue * scale + 0.5f);  
+}  
+
+ /** 
+  * 根据手机的分辨率从 px(像素) 的单位 转成为 dp 
+  */  
+public static int px2dip(Context context, float pxValue) {  
+    final float scale = context.getResources().getDisplayMetrics().density;  
+    return (int) (pxValue / scale + 0.5f);  
+ }  
+} 
+</code></pre>
+</li>
+</ul>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/jingbolee/customview_viewpager">Customview viewpager</a> is maintained by <a href="https://github.com/jingbolee">jingbolee</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
