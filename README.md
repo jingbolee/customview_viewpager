@@ -1,11 +1,11 @@
 # customview_viewpager
-##功能
+##功能点
 1. 通过ViewPager实现app的引导页
 2. 全屏显示，通过theme设置去掉actionbar和系统状态栏
 3. 只有第一次进入会运行app的引导页，就是说当点击过开始体验按钮以后，第二次进入应用不会再出现
 4. point会跟随viewpager滑动而动态滑动
 
-##ViewPager引导页知识点
+##知识点
 
 - ViewPager最多缓存3个页面。
 - ViewPager设置**addOnPageChangeListener()**，其中onPageScrolled()方法可以获取到ViewPager处于哪一页，滑动偏移量等信息
@@ -72,3 +72,7 @@
         	return (int) (pxValue / scale + 0.5f);  
    		 }  
 		} 
+
+
+##ViewPager其他使用
+- ViewPager实现大图自动无限轮播：[LBanner](http://www.lijingbo.cc/LBanner/)
